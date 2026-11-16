@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A Letter of Gratitude</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #dfe9f2;
+  --bg-glow: #f4f8fb;
+  --ink: #1d2b3a;
+  --muted: #4d6073;
+  --paper: #fdfbf6;
+  --env: #f3efe4;
+  --env-flap: #e6e0cf;
+  --air-red: #d6453d;
+  --air-blue: #2f5ea8;
+  --seal: #a3262a;
+  --scrim: rgba(20, 34, 48, .55);
+  --hand: #23407a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101a26; --bg-glow: #1b2b3d; --ink: #1d2b3a; --muted: #9fb2c6;
+    --scrim: rgba(0, 0, 0, .65);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101a26; --bg-glow: #1b2b3d; --ink: #1d2b3a; --muted: #9fb2c6; --scrim: rgba(0,0,0,.65);
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0; min-height: 100%;
+  background: radial-gradient(ellipse at 50% 35%, var(--bg-glow), var(--bg) 70%);
+  color: var(--muted);
+  font-family: "Lora", Georgia, "Times New Roman", serif;
+  display: grid; place-items: center; padding: 24px 16px;
+}
+.stage { text-align: center; width: 100%; }
+h1 {
+  font-family: "Caveat", "Segoe Script", cursive; font-weight: 700;
+  font-size: clamp(2rem, 6vw, 2.8rem); margin: 0 0 6px; color: var(--muted);
+}
+.hint { margin: 0 0 clamp(70px, 14vw, 110px); font-size: 1rem; }
+
+/* Envelope */
+.env-btn {
+  all: unset; cursor: pointer; display: block; margin: 0 auto;
+  width: min(340px, 86vw); aspect-ratio: 340 / 224; position: relative;
+  perspective: 1100px; transition: transform .8s ease .9s, opacity .6s ease .9s;
+}
+.env-btn:focus-visible { outline: 3px solid var(--air-blue); outline-offset: 10px; border-radius: 6px; }
+.env-btn:hover:not(.open) { transform: translateY(-4px) rotate(-1deg); transition: transform .25s; }
+.env-btn > * { position: absolute; inset: 0; }
+.stripes {
+  background: repeating-linear-gradient(-45deg,
+    var(--air-red) 0 14px, #fff 14px 28px, var(--air-blue) 28px 42px, #fff 42px 56px);
+}
+.stripes::after { content: ""; position: absolute; inset: 7px; background: var(--env); }
+.back { z-index: 1; border-radius: 4px; box-shadow: 0 18px 30px rgba(10, 25, 40, .28); }
+.peek {
+  z-index: 2; inset: auto 9% 8px 9%; height: 84%; background: var(--paper);
+  border-radius: 3px; box-shadow: 0 -1px 6px rgba(0,0,0,.18);
+  transition: transform .8s cubic-bezier(.3,.8,.3,1) .6s;
+  background-image: repeating-linear-gradient(transparent 0 21px, rgba(47,94,168,.18) 21px 22px);
+  background-position: 0 14px;
+}
+.front {
+  z-index: 3; border-radius: 4px;
+  clip-path: polygon(0 0, 50% 56%, 100% 0, 100% 100%, 0 100%);
+}
+.addr {
+  position: absolute; z-index: 4; left: 0; right: 0; top: 62%;
+  text-align: center; font-family: "Caveat", cursive; font-weight: 500;
+  font-size: clamp(1.15rem, 4.6vw, 1.5rem); color: var(--hand); line-height: 1.15; pointer-events: none;
+}
+.addr small { display: block; font-size: .8em; opacity: .75; }
+.flap {
+  z-index: 5; inset: 0 0 auto 0; height: 56%; transform-origin: top center;
+  background: linear-gradient(var(--env-flap), #d9d2bd);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transition: transform .7s ease, z-index 0s .35s;
+}
+.seal {
+  z-index: 6; inset: auto; left: 50%; top: 56%; width: 46px; height: 46px; margin: -23px 0 0 -23px;
+  border-radius: 50%; background: radial-gradient(circle at 35% 30%, #d4474b, var(--seal));
+  display: grid; place-items: center; color: #ffd9d4; font-size: 1.3rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,.35); transition: opacity .3s;
+}
+.env-btn.open .flap { transform: rotateX(180deg); z-index: 1; }
+.env-btn.open .seal { opacity: 0; }
+.env-btn.open .peek { transform: translateY(-62%); }
+.env-btn.sent { transform: translateY(40px) scale(.9); opacity: 0; pointer-events: none; }
+
+/* Reading view */
+.overlay {
+  position: fixed; inset: 0; z-index: 20; background: var(--scrim);
+  display: grid; place-items: center; padding: max(16px, env(safe-area-inset-top, 0px)) 16px max(16px, env(safe-area-inset-bottom, 0px));
+  opacity: 0; visibility: hidden; transition: opacity .5s, visibility 0s .5s;
+}
+.overlay.show { opacity: 1; visibility: visible; transition: opacity .5s; }
+.paper {
+  width: min(560px, 100%); max-height: 100%; overflow-y: auto; background: var(--paper);
+  background-image: repeating-linear-gradient(transparent 0 33px, rgba(47,94,168,.13) 33px 34px);
+  background-position: 0 56px;
+  color: var(--ink); border-radius: 4px; padding: clamp(24px, 6vw, 44px) clamp(22px, 6vw, 46px) 30px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.4);
+  transform: translateY(40%) scale(.7); transition: transform .8s cubic-bezier(.2,.9,.3,1);
+}
+.overlay.show .paper { transform: none; }
+.paper p { margin: 0 0 17px; line-height: 34px; font-size: 1.04rem; }
+.paper .greet { font-family: "Caveat", cursive; font-size: 2rem; font-weight: 700; color: var(--hand); line-height: 34px; margin-bottom: 17px; }
+.paper .sign { font-family: "Caveat", cursive; font-size: 1.7rem; color: var(--hand); line-height: 34px; margin: 20px 0 0; }
+.paper .sign span { display: block; font-size: 2.1rem; font-weight: 700; }
+.line { opacity: 0; transform: translateY(8px); }
+.overlay.show .line { animation: write .8s ease forwards; animation-delay: calc(.9s + var(--i) * .75s); }
+@keyframes write { to { opacity: 1; transform: none; } }
+.actions { display: flex; gap: 10px; justify-content: center; margin-top: 26px; }
+button.btn {
+  font: inherit; font-size: .95rem; padding: 10px 18px; border-radius: 999px; cursor: pointer;
+  border: 1.5px solid var(--air-blue); background: transparent; color: var(--air-blue);
+}
+button.btn:hover { background: var(--air-blue); color: #fff; }
+button.btn:focus-visible { outline: 3px solid var(--air-red); outline-offset: 2px; }
+.again { margin-top: 28px; visibility: hidden; }
+.again.show { visibility: visible; }
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: .01s !important; transition-delay: 0s !important; animation-duration: .01s !important; animation-delay: 0s !important; }
+}
+</style>
+</head>
+<body>
+<main class="stage">
+  <h1>You have a letter</h1>
+  <p class="hint" id="hint">Tap the envelope to open it.</p>
+
+  <button class="env-btn" id="env" aria-label="Open the gratitude letter">
+    <div class="back stripes"></div>
+    <div class="peek"></div>
+    <div class="front stripes"></div>
+    <div class="addr" id="addr"></div>
+    <div class="flap"></div>
+    <div class="seal" aria-hidden="true">♥</div>
+  </button>
+
+  <button class="btn again" id="again">Read the letter again</button>
+</main>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="Letter of gratitude">
+  <article class="paper" id="paper"></article>
+</div>
+
+<script>
+// ✏️ Edit these to personalize the letter
+const CONFIG = {
+  professor: "Ma’am Roan",
+  student: "Lorenz Gonzales",
+  paragraphs: [
+    "Maraming salamat po sa lahat, Ma’am Roan, sa pagtuturo, sa pag-aadjust para sa amin, at sa pagbibigay ng masayang oras sa klase.",
+    "Thank you po ulit, at advance Merry Christmas na rin, hehehe!"
+  ],
+  closing: "With sincere gratitude,"
+};
+
+const env = document.getElementById("env");
+const overlay = document.getElementById("overlay");
+const paper = document.getElementById("paper");
+const again = document.getElementById("again");
+const hint = document.getElementById("hint");
+let timer;
+
+document.getElementById("addr").innerHTML = "<small>To</small>";
+document.getElementById("addr").append(CONFIG.professor);
+
+function build() {
+  paper.innerHTML = "";
+  let i = 0;
+  const add = (tag, cls, text) => {
+    const el = document.createElement(tag);
+    el.className = cls; el.style.setProperty("--i", i++); el.textContent = text;
+    paper.appendChild(el); return el;
+  };
+  add("div", "greet line", "Dear " + CONFIG.professor + ",");
+  CONFIG.paragraphs.forEach(t => add("p", "line", t));
+  const s = add("p", "sign line", CONFIG.closing);
+  const n = document.createElement("span"); n.textContent = CONFIG.student; s.appendChild(n);
+  const act = document.createElement("div");
+  act.className = "actions line"; act.style.setProperty("--i", i);
+  const close = document.createElement("button");
+  close.className = "btn"; close.textContent = "Close letter";
+  close.addEventListener("click", closeLetter);
+  act.appendChild(close); paper.appendChild(act);
+  paper.scrollTop = 0;
+}
+
+function openEnvelope() {
+  if (env.classList.contains("open")) return;
+  env.classList.add("open");
+  hint.textContent = "";
+  timer = setTimeout(showLetter, 1900);
+}
+function showLetter() {
+  build();
+  env.classList.add("sent");
+  overlay.classList.add("show");
+  paper.focus?.();
+}
+function closeLetter() {
+  overlay.classList.remove("show");
+  again.classList.add("show");
+}
+function readAgain() {
+  again.classList.remove("show");
+  build();
+  void overlay.offsetWidth;
+  overlay.classList.add("show");
+}
+
+env.addEventListener("click", openEnvelope);
+again.addEventListener("click", readAgain);
+document.addEventListener("keydown", e => { if (e.key === "Escape" && overlay.classList.contains("show")) closeLetter(); });
+</script>
+</body>
+</html>
